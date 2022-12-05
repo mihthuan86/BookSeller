@@ -1,5 +1,4 @@
 ﻿@model BookSeller.Models.Book
-
 @{
     ViewData["Title"] = "Create";
 }
@@ -39,7 +38,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="BookCategory" class="control-label"></label>
-                <select asp-for="BookCategory" class="form-control"></select>
+                <select asp-for="BookCategory" class="form-control" asp-items="Html.GetEnumSelectList<BookSeller.Data.Enums.BookCategory>()"></select>
                 <span asp-validation-for="BookCategory" class="text-danger"></span>
             </div>
             <div class="form-group">

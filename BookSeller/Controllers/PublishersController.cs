@@ -13,10 +13,12 @@ namespace BookSeller.Controllers
     public class PublishersController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public PublishersController(AppDbContext context)
+        public PublishersController(AppDbContext context, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         // GET: Publishers
@@ -54,10 +56,20 @@ namespace BookSeller.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,FullName,ProfilePictureURL,Bio")] Publisher publisher)
+        public async Task<IActionResult> Create([Bind("Id,FullName,PictureFile,Bio")] Publisher publisher)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
+                string wwwRootPath = _webHostEnvironment.WebRootPath;
+                string fileName = Path.GetFileNameWithoutExtension(publisher.PictureFile.FileName);
+                string extension = Path.GetExtension(publisher.PictureFile.FileName);
+                fileName += DateTime.Now.ToString("ddMMyyyy") + extension;
+                publisher.ProfilePictureURL = fileName;
+                string path = Path.Combine(wwwRootPath + "/Img/Publisher", fileName);
+                using (var fileStream = new FileStream(path, FileMode.Create))
+                {
+                    await publisher.PictureFile.CopyToAsync(fileStream);
+                }
                 _context.Add(publisher);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -86,19 +98,29 @@ namespace BookSeller.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,FullName,ProfilePictureURL,Bio")] Publisher publisher)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,FullName,PictureFile,Bio")] Publisher publisher)
         {
             if (id != publisher.Id)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 try
                 {
+                    string wwwRootPath = _webHostEnvironment.WebRootPath;
+                    string fileName = Path.GetFileNameWithoutExtension(publisher.PictureFile.FileName);
+                    string extension = Path.GetExtension(publisher.PictureFile.FileName);
+                    fileName += DateTime.Now.ToString("ddMMyyyy") + extension;
+                    publisher.ProfilePictureURL = fileName;
+                    string path = Path.Combine(wwwRootPath + "/Img/Publisher", fileName);
+                    using (var fileStream = new FileStream(path, FileMode.Create))
+                    {
+                        await publisher.PictureFile.CopyToAsync(fileStream);
+                    }
                     _context.Update(publisher);
-                    await _context.SaveChangesAsync();
+                    await _context.SaveChangesAsync();                 
                 }
                 catch (DbUpdateConcurrencyException)
                 {

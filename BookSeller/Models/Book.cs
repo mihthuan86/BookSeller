@@ -12,6 +12,8 @@ namespace BookSeller.Models
         public string Description { get; set; }
         public double Price { get; set; }
         public string ImageURL { get; set; }
+        [NotMapped]
+        public IFormFile PictureFile { get; set; }
         public DateTime PublishingYear { get; set; }
         public BookCategory BookCategory { get; set; }
 

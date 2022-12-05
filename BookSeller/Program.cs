@@ -7,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(option => option.UseSqlServer(
     builder.Configuration.GetConnectionString("DefaltConnectionString")
     ));
+
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
@@ -28,6 +29,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Books}/{action=Index}/{id?}");
 AppDbInitializer.Seed(app);
 app.Run();

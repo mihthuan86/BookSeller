@@ -7,16 +7,18 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BookSeller.Data;
 using BookSeller.Models;
+using System.Security.Policy;
 
 namespace BookSeller.Controllers
 {
     public class AuthorsController : Controller
     {
         private readonly AppDbContext _context;
-
-        public AuthorsController(AppDbContext context)
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        public AuthorsController(AppDbContext context, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         // GET: Authors
@@ -54,10 +56,20 @@ namespace BookSeller.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,ProfilePictureURL,FullName,Bio")] Author author)
+        public async Task<IActionResult> Create([Bind("Id,PictureFile,FullName,Bio")] Author author)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
+                string wwwRootPath = _webHostEnvironment.WebRootPath;
+                string fileName = Path.GetFileNameWithoutExtension(author.PictureFile.FileName);
+                string extension = Path.GetExtension(author.PictureFile.FileName);
+                fileName += DateTime.Now.ToString("ddMMyyyy") + extension;
+                author.ProfilePictureURL = fileName;
+                string path = Path.Combine(wwwRootPath + "/Img/Author", fileName);
+                using (var fileStream = new FileStream(path, FileMode.Create))
+                {
+                    await author.PictureFile.CopyToAsync(fileStream);
+                }
                 _context.Add(author);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -86,19 +98,30 @@ namespace BookSeller.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,ProfilePictureURL,FullName,Bio")] Author author)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,PictureFile,FullName,Bio")] Author author)
         {
             if (id != author.Id)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 try
                 {
+                    string wwwRootPath = _webHostEnvironment.WebRootPath;
+                    string fileName = Path.GetFileNameWithoutExtension(author.PictureFile.FileName);
+                    string extension = Path.GetExtension(author.PictureFile.FileName);
+                    fileName += DateTime.Now.ToString("ddMMyyyy") + extension;
+                    author.ProfilePictureURL = fileName;
+                    string path = Path.Combine(wwwRootPath + "/Img/Author", fileName);
+                    using (var fileStream = new FileStream(path, FileMode.Create))
+                    {
+                        await author.PictureFile.CopyToAsync(fileStream);
+                    }
                     _context.Update(author);
                     await _context.SaveChangesAsync();
+                    
                 }
                 catch (DbUpdateConcurrencyException)
                 {
