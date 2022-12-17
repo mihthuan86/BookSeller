@@ -1,4 +1,6 @@
 using BookSeller.Data;
+using BookSeller.Data.Cart;
+using BookSeller.Data.Service;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,6 +9,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(option => option.UseSqlServer(
     builder.Configuration.GetConnectionString("DefaltConnectionString")
     ));
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddScoped(sc => ShoppingCart.GetShoppingCart(sc));
+
+builder.Services.AddSession();
 
 builder.Services.AddControllersWithViews();
 
@@ -24,7 +31,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.UseSession();
 app.UseAuthorization();
 
 app.MapControllerRoute(

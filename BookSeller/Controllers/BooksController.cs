@@ -7,25 +7,38 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BookSeller.Data;
 using BookSeller.Models;
+using Microsoft.AspNetCore.Hosting;
+using NuGet.Protocol;
 
 namespace BookSeller.Controllers
 {
     public class BooksController : Controller
     {
         private readonly AppDbContext _context;
-
-        public BooksController(AppDbContext context)
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        public BooksController(AppDbContext context, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         // GET: Books
         public async Task<IActionResult> Index()
         {
             var appDbContext = _context.Books.Include(b => b.Author).Include(b => b.Publisher);
+           
             return View(await appDbContext.ToListAsync());
         }
-
+        public async Task<IActionResult> Filter(string searchString)
+        {
+            var allBooks = from b in _context.Books.Include(b => b.Author).Include(b => b.Publisher) select b;
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                var filterBooks = allBooks.Where(s=>s.Name.Contains(searchString)|| s.Description.Contains(searchString)).ToList();
+                return View("Index", filterBooks);
+            }
+            return View("Index",allBooks.ToList());
+        }
         // GET: Books/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -44,13 +57,12 @@ namespace BookSeller.Controllers
             }
 
             return View(book);
-        }
-
+        }       
         // GET: Books/Create
         public IActionResult Create()
         {
-            ViewData["AuthorId"] = new SelectList(_context.Authors, "Id", "Id");
-            ViewData["PublisherId"] = new SelectList(_context.Publishers, "Id", "Id");
+            ViewBag.AuthorId = new SelectList(_context.Authors.OrderBy(n => n.FullName).ToList(),"Id","FullName");
+            ViewBag.PublisherId = new SelectList(_context.Publishers.OrderBy(n => n.FullName).ToList(), "Id", "FullName");
             return View();
         }
 
@@ -59,16 +71,26 @@ namespace BookSeller.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Description,Price,ImageURL,PublishingYear,BookCategory,AuthorId,PublisherId")] Book book)
+        public async Task<IActionResult> Create([Bind("Id,Name,Description,Price,PictureFile,PublishingYear,BookCategory,AuthorId,PublisherId")] Book book)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
+                string wwwRootPath = _webHostEnvironment.WebRootPath;
+                string fileName = Path.GetFileNameWithoutExtension(book.PictureFile.FileName);
+                string extension = Path.GetExtension(book.PictureFile.FileName);
+                fileName += DateTime.Now.ToString("ddMMyyyy") + extension;
+                book.ImageURL = fileName;
+                string path = Path.Combine(wwwRootPath + "/Img/Book", fileName);
+                using (var fileStream = new FileStream(path, FileMode.Create))
+                {
+                    await book.PictureFile.CopyToAsync(fileStream);
+                }
                 _context.Add(book);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AuthorId"] = new SelectList(_context.Authors, "Id", "Id", book.AuthorId);
-            ViewData["PublisherId"] = new SelectList(_context.Publishers, "Id", "Id", book.PublisherId);
+            ViewBag.AuthorId = new SelectList(_context.Authors.OrderBy(n => n.FullName).ToList(), "Id", "FullName");
+            ViewBag.PublisherId = new SelectList(_context.Publishers.OrderBy(n => n.FullName).ToList(), "Id", "FullName");
             return View(book);
         }
 

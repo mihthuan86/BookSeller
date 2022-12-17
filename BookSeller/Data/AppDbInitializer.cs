@@ -62,7 +62,7 @@ namespace BookSeller.Data
                             Description = "Tôi thấy hoa vàng trên cỏ xanh <br/> Tái bản 2018",
                             Price = 150000,
                             ImageURL = "toi-thay-hoa-vang-tren-co-xanh.jpg",
-                            PublishingYear = DateTime.Now.AddYears(-4),
+                            PublishingYear = 2005,
                             AuthorId = 1,
                             PublisherId = 1,
                             BookCategory = BookCategory.TruyenTranh
@@ -73,7 +73,7 @@ namespace BookSeller.Data
                             Description = "Mô tả các thứ",
                             Price = 100000,
                             ImageURL = "chuc-mot-ngay-tot-lanh.jpg",
-                            PublishingYear = DateTime.Now.AddYears(-4),
+                            PublishingYear = 2007,
                             AuthorId = 1,
                             PublisherId = 1,
                             BookCategory = BookCategory.KinhTe
@@ -84,7 +84,7 @@ namespace BookSeller.Data
                             Description = "Mô tả các thứ",
                             Price = 90000,
                             ImageURL = "image_nhagiakim.jpg",
-                            PublishingYear = DateTime.Now.AddYears(-6),
+                            PublishingYear = 2010,
                             AuthorId = 2,
                             PublisherId = 2,
                             BookCategory = BookCategory.TieuThuyet
