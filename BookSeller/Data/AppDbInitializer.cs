@@ -1,21 +1,23 @@
 ﻿using BookSeller.Data.Enums;
+using BookSeller.Data.Static;
 using BookSeller.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace BookSeller.Data
 {
-        public class AppDbInitializer
+    public class AppDbInitializer
+    {
+        public static void Seed(IApplicationBuilder applicationBuilder)
         {
-            public static void Seed(IApplicationBuilder applicationBuilder)
+            using (var serviceScope = applicationBuilder.ApplicationServices.CreateScope())
             {
-                using (var serviceScope = applicationBuilder.ApplicationServices.CreateScope())
+                var context = serviceScope.ServiceProvider.GetService<AppDbContext>();
+                context.Database.EnsureCreated();
+                //Tác giả
+                if (!context.Authors.Any())
                 {
-                    var context = serviceScope.ServiceProvider.GetService<AppDbContext>();
-                    context.Database.EnsureCreated();
-                    //Tác giả
-                    if (!context.Authors.Any())
+                    context.Authors.AddRange(new List<Author>()
                     {
-                        context.Authors.AddRange(new List<Author>()
-                    {                       
                         new Author()
                         {
                             FullName = "Nguyễn Nhật Ánh",
@@ -29,12 +31,12 @@ namespace BookSeller.Data
                             ProfilePictureURL = "Paulo-Coel.jpg"
                         }
                     });
-                        context.SaveChanges();
-                    }
-                    //Nhà Xuất Bản
-                    if (!context.Publishers.Any())
-                    {
-                        context.Publishers.AddRange(new List<Publisher>()
+                    context.SaveChanges();
+                }
+                //Nhà Xuất Bản
+                if (!context.Publishers.Any())
+                {
+                    context.Publishers.AddRange(new List<Publisher>()
                     {
                         new Publisher()
                         {
@@ -49,13 +51,13 @@ namespace BookSeller.Data
                             ProfilePictureURL = "nhaxb-giaoduc.png"
                         }
                     });
-                        context.SaveChanges();
-                    }
-                    //movie
-                    if (!context.Books.Any())
+                    context.SaveChanges();
+                }
+                //movie
+                if (!context.Books.Any())
+                {
+                    context.Books.AddRange(new List<Book>()
                     {
-                        context.Books.AddRange(new List<Book>()
-                    {                       
                         new Book()
                         {
                             Name = "Tôi thấy hoa vàng trên cỏ xanh",
@@ -90,10 +92,60 @@ namespace BookSeller.Data
                             BookCategory = BookCategory.TieuThuyet
                         }
                     });
-                        context.SaveChanges();
-                    }
+                    context.SaveChanges();
                 }
             }
         }
-    
+
+        public static async Task SeedUsersAndRoleAsync(IApplicationBuilder applicationBuilder)
+        {
+            using (var serviceScope = applicationBuilder.ApplicationServices.CreateScope())
+            {
+
+                //Roles
+                var roleManager = serviceScope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+                if (!await roleManager.RoleExistsAsync(UserRoles.Admin))
+                    await roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
+                if (!await roleManager.RoleExistsAsync(UserRoles.User))
+                    await roleManager.CreateAsync(new IdentityRole(UserRoles.User));
+
+                //Users
+                var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+                string adminUserEmail = "admin@bookseller.com";
+
+                var adminUser = await userManager.FindByEmailAsync(adminUserEmail);
+                if (adminUser == null)
+                {
+                    var newAdminUser = new ApplicationUser()
+                    {
+                        FullName = "Admin User",
+                        UserName = "admin-user",
+                        Email = adminUserEmail
+                        
+                    };
+                    await userManager.CreateAsync(newAdminUser, "Coding@1234?");
+                    await userManager.AddToRoleAsync(newAdminUser, UserRoles.Admin);
+                }
+
+
+                string appUserEmail = "user@bookseller.com";
+
+                var appUser = await userManager.FindByEmailAsync(appUserEmail);
+                if (appUser == null)
+                {
+                    var newAppUser = new ApplicationUser()
+                    {
+                        FullName = "Application User",
+                        UserName = "app-user",
+                        Email = appUserEmail
+                        
+                    };
+                    await userManager.CreateAsync(newAppUser, "Coding@1234?");
+                    await userManager.AddToRoleAsync(newAppUser, UserRoles.User);
+                }
+            }
+        }
+    }
+
 }

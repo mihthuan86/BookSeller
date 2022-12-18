@@ -1,0 +1,98 @@
+﻿@model BookSeller.Data.ViewModels.RegisterViewModel
+@{
+	ViewData["Title"] = "Sign-up";
+}
+
+<div class="row">
+	<div class="col-md-6 offset-3">
+		<p>
+			<h4>Đăng ký tài khoản mới</h4>
+		</p>
+
+		@if (TempData["Error"] != null)
+		{
+			<div class="col-md-12 alert alert-danger">
+				<span><b>Sorry!</b> - @TempData["Error"] </span>
+			</div>
+		}
+		@if (ViewBag.Error != null)
+		{
+			List<Microsoft.AspNetCore.Identity.IdentityError> errors = ViewBag.Error;
+			foreach (var item in errors)
+			{
+				<div class="col-md-12 alert alert-danger">
+					<span><b>Sorry!</b> - @item.Description </span>
+				</div>
+			}
+			
+		}
+		<div class="row">
+			<div class="col-md-8 offset-2">
+				<form asp-action="Register">
+					<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+					<div class="col-form-label">
+						<label asp-for="FullName" class="control-label"></label>
+						<input asp-for="FullName" class="form-control" />
+						<span asp-validation-for="FullName" class="text-danger"></span>
+					</div>
+					<div class="col-form-label">
+						<label asp-for="EmailAddress" class="control-label"></label>
+						<input asp-for="EmailAddress" class="form-control" />
+						<span asp-validation-for="EmailAddress" class="text-danger"></span>
+					</div>
+					<div class="col-form-label">
+						<label asp-for="Password" class="control-label"></label>
+						<input asp-for="Password" id="inpPassword" class="form-control" />
+						<span asp-validation-for="Password" class="text-danger"></span>
+						<div class="input-group-append">
+							<button class="btn btn-outline-secondary" type="button" id="btnPassword">
+								<span class="fas fa-eye"></span>
+							</button>
+						</div>
+					</div>
+					<div class="col-form-label">
+						<label asp-for="ConfirmPassword" class="control-label"></label>
+						<input asp-for="ConfirmPassword" id="inpCPassword" class="form-control" />
+						<span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+						<div class="input-group-append">
+							<button class="btn btn-outline-secondary" type="button" id="btnCPassword">
+								<span class="fas fa-eye"></span>
+							</button>
+						</div>
+					</div>
+
+					<div class="col-form-label">
+						<input class="btn btn-outline-success float-end" type="submit" value="Sign up" />
+						<a class="btn btn-outline-secondary" asp-controller="Books" asp-action="Index">Cancel</a>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+	const ipnElement = document.querySelector('#inpPassword')
+	const btnElement = document.querySelector('#btnPassword')
+	const ipnCElement = document.querySelector('#inpCPassword')
+	const btnCElement = document.querySelector('#btnCPassword')
+	// step 2
+	btnElement.addEventListener('click', function () {
+		// step 3
+		const currentType = ipnElement.getAttribute('type')
+		// step 4
+		ipnElement.setAttribute(
+			'type',
+			currentType === 'password' ? 'text' : 'password'
+		)
+	})
+	btnCElement.addEventListener('click', function () {
+		// step 3
+		const currentType = ipnCElement.getAttribute('type')
+		// step 4
+		ipnCElement.setAttribute(
+			'type',
+			currentType === 'password' ? 'text' : 'password'
+		)
+	})
+</script>

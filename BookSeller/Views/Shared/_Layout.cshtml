@@ -42,11 +42,14 @@
                     </ul>
                     <form class="d-flex" asp-controller="Books" asp-action="Filter">
                         <input name="searchString" class="form-control me-sm-2" type="text"  placeholder="Nhập tên sách muốn tìm">
-                        <button class="btn btn-secondary my-2 my-sm-0" type="submit">Search</button>
+                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit"><i class="bi bi-search"></i></button>
                     </form>
                     <ul class="navbar-nav">   
                         @await Component.InvokeAsync("ShoppingCartSummary")
                     </ul>
+
+                    <partial name="_Identity.cshtml" />
+
                 </div>
             </div>
         </nav>
