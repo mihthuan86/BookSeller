@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using BookSeller.Data.ViewModels;
 using System.Text.RegularExpressions;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 
 namespace BookSeller.Controllers
 {
@@ -28,13 +29,11 @@ namespace BookSeller.Controllers
             string temp = s.Normalize(NormalizationForm.FormD);
             return regex.Replace(temp, String.Empty).Replace('\u0111', 'd').Replace('\u0110', 'D');
         }
-        //public async Task<IActionResult> Users()
-        //{
-        //    var users = await _context.Users.ToListAsync();
-        //    return View(users);
-        //}
-
-
+        public async Task<IActionResult> Users()
+        {
+            var users = await _context.Users.ToListAsync();
+            return View(users);
+        }
         public IActionResult Login() => View(new LoginViewModel());
 
         [HttpPost]

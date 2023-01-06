@@ -9,9 +9,12 @@ using BookSeller.Data;
 using BookSeller.Models;
 using Microsoft.AspNetCore.Hosting;
 using NuGet.Protocol;
+using Microsoft.AspNetCore.Authorization;
+using BookSeller.Data.Static;
 
 namespace BookSeller.Controllers
 {
+    //[Authorize(Roles =UserRoles.Admin)]
     public class BooksController : Controller
     {
         private readonly AppDbContext _context;
@@ -21,6 +24,7 @@ namespace BookSeller.Controllers
             _context = context;
             _webHostEnvironment = webHostEnvironment;
         }
+        [AllowAnonymous]
 
         // GET: Books
         public async Task<IActionResult> Index()
@@ -29,6 +33,8 @@ namespace BookSeller.Controllers
            
             return View(await appDbContext.ToListAsync());
         }
+        [AllowAnonymous]
+
         public async Task<IActionResult> Filter(string searchString)
         {
             var allBooks = from b in _context.Books.Include(b => b.Author).Include(b => b.Publisher) select b;
@@ -39,6 +45,8 @@ namespace BookSeller.Controllers
             }
             return View("Index",allBooks.ToList());
         }
+       // [AllowAnonymous]
+
         // GET: Books/Details/5
         public async Task<IActionResult> Details(int? id)
         {

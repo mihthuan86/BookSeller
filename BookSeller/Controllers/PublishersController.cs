@@ -41,7 +41,7 @@ namespace BookSeller.Controllers
             {
                 return NotFound();
             }
-
+            ViewBag.bookPublisher = _context.Books.Where(n => n.AuthorId == publisher.Id);
             return View(publisher);
         }
 

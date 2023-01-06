@@ -18,10 +18,14 @@ namespace BookSeller.Data.Service
             return order;
         }
 
-		public async Task<List<Order>> GetOrderByUserIdAsync(string userId)
+		public async Task<List<Order>> GetOrderByUserIdAndRoleAsync(string userId,string userRole)
 		{
-			var order = await _context.Orders.Include(n => n.OrderItems).ThenInclude(n => n.Book).Where(
-				n => n.UserId == userId).ToListAsync();
+			var order = await _context.Orders.Include(n => n.OrderItems).ThenInclude(n => n.Book).Include(n => n.User).ToListAsync();
+			if(userRole != "Admin")
+			{
+				order = order.Where(n => n.UserId == userId).ToList();
+			}
+			
 			return order;
 		}
 

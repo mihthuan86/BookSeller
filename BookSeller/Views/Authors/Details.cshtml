@@ -12,7 +12,7 @@
 	<div class="row">
 
 		<table class="table">
-			
+
 			<tr>
 				<td width="500px">
 					<div class="col-form-label">
@@ -28,14 +28,28 @@
 					</div>
 				</td>
 			</tr>
-
-
+			
+				
+			
 		</table>
 		<div>
-		<a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-		<a asp-action="Index">Back to List</a>
+			<h4>Tác phẩm tiêu biểu</h4>
+			@foreach (Book item in ViewBag.bookAuthor)
+			{ <a asp-controller="Books" asp-action="Details" asp-route-id="@item.Id">
+				<img src="@("/Img/Book/"+item.ImageURL)" alt="@item.Name" style="max-width:120px;margin:20px;border:solid #000" />
+			  </a>
+			}
+		</div>
+		<div>
+			@if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+			{
+				<a class="btn btn-outline-success float-end" asp-action="Edit" asp-route-id="@Model?.Id">Edit</a>
+			}
+ 
+			<a class="btn btn-outline-primary" asp-action="Index">Back to List</a>
 		</div>
 	</div>
 </div>
 
 </div>
+	

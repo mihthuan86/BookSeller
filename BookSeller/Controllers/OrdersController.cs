@@ -6,9 +6,13 @@ using BookSeller.Data.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Drawing.Printing;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using BookSeller.Data.Static;
 
 namespace BookSeller.Controllers
 {
+    //[Authorize]
     public class OrdersController : Controller
     {
         private readonly AppDbContext _context;
@@ -23,8 +27,9 @@ namespace BookSeller.Controllers
 
         public async Task<IActionResult> Index()
         {
-            string userId = "";
-            var order = await _orderService.GetOrderByUserIdAsync(userId);
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            string userRole = User.FindFirstValue(ClaimTypes.Role);
+            var order = await _orderService.GetOrderByUserIdAndRoleAsync(userId,userRole);
             return View(order);
         }
 
@@ -68,7 +73,7 @@ namespace BookSeller.Controllers
         public async Task<IActionResult> CompleteOrder([Bind("Id,UserId,Name,PhoneNumber,Address")] Order order)
         {
             var item = _shoppingCart.GetShoppingCartItems();
-            string userId = "";
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             string Name = order.Name;
             string PhoneNumber = order.PhoneNumber;
             string Address = order.Address;
@@ -78,8 +83,7 @@ namespace BookSeller.Controllers
         }
         public async Task<IActionResult> Checkout()
         {
-            var item = _shoppingCart.GetShoppingCartItems();
-            ViewBag.ShoppingItem = item;
+            
             return View();
         }
     }

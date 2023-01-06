@@ -24,12 +24,15 @@
                     <div class="card-body">
                         <p class="card-text">@Model.Description</p>
                         <p class="card-text">
-                            <b>Cinema: </b>
-                            <a asp-controller="Publishers" asp-action="Details" asp-route-id="@Model.Publisher.Id">
+                            <b>Nhà xuất bản: </b>
+                            <a asp-controller="Publishers" asp-action="Details" asp-route-id="@Model.Publisher.Id" style="text-decoration-line: none;">
                                 @Model.Publisher.FullName
                             </a>
                         </p>                      
-                        <p class="card-text"><b>Thể Loại: </b>@Model.BookCategory</p>
+                        <p class="card-text">
+                            <b>Thể Loại: @Model.BookCategory </b>@{
+                            
+                        }</p>
                         <p class="card-text"><b> Năm Xuất Bản: </b>@Model.PublishingYear</p>                                            
                         <p class="card-text">
                             <b>Tác giả: </b>
@@ -38,7 +41,7 @@
                                     <div class="column text-center">
                                         <img class="border-info rounded-circle" src="@("/Img/Author/"+Model.Author.ProfilePictureURL)" style="max-width: 150px" />
                                         <br />
-                                    <a asp-controller="Authors" asp-action="Details" asp-route-id="@Model.Author.Id">@Model.Author.FullName</a>
+                                    <a asp-controller="Authors" asp-action="Details" asp-route-id="@Model.Author.Id" style="text-decoration-line: none;">@Model.Author.FullName</a>
                                     </div>                             
                             </div>
                         </p>

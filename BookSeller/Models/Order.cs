@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BookSeller.Models
 {
@@ -7,7 +8,8 @@ namespace BookSeller.Models
         [Key]
         public int Id { get; set; }
         public string UserId { get; set; }
-
+        [ForeignKey(nameof(UserId))]
+        public ApplicationUser User { get; set; }
         [Required]
         public string Name { get; set; }
         public string PhoneNumber { get; set; }

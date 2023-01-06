@@ -8,9 +8,12 @@ using Microsoft.EntityFrameworkCore;
 using BookSeller.Data;
 using BookSeller.Models;
 using System.Security.Policy;
+using Microsoft.AspNetCore.Authorization;
+using BookSeller.Data.Static;
 
 namespace BookSeller.Controllers
 {
+    //[Authorize(Roles = UserRoles.Admin)]
     public class AuthorsController : Controller
     {
         private readonly AppDbContext _context;
@@ -20,13 +23,13 @@ namespace BookSeller.Controllers
             _context = context;
             _webHostEnvironment = webHostEnvironment;
         }
-
+        //[AllowAnonymous]
         // GET: Authors
         public async Task<IActionResult> Index()
         {
               return View(await _context.Authors.ToListAsync());
         }
-
+        [AllowAnonymous]
         // GET: Authors/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -41,6 +44,7 @@ namespace BookSeller.Controllers
             {
                 return NotFound();
             }
+            ViewBag.bookAuthor = _context.Books.Where(n => n.AuthorId == author.Id);
 
             return View(author);
         }

@@ -25,20 +25,24 @@
                                 <span class="visually-hidden">(current)</span>
                             </a>
                         </li>
-                        <li class="nav-item dropdown">
-                            <span class="nav-link dropdown-toggle show" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true">
-                                <i class="bi bi-gear"></i>Management
-                            </span>
-                            <div class="dropdown-menu">
-                                <a class="dropdown-item" asp-controller="Authors" asp-action="Index">
-                                    <i class="bi bi-person-circle"></i> Tác Giả
-                                </a>
-                                <a class="dropdown-item" asp-controller="Publishers" asp-action="Index">
-                                    <i class="bi bi-headset"></i> Nhà Xuất Bản
-                                </a>
-                                
-                            </div>
-                        </li>
+                        @if(User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item dropdown">
+                                <span class="nav-link dropdown-toggle show" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true">
+                                    <i class="bi bi-gear"></i>Management
+                                </span>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" asp-controller="Authors" asp-action="Index">
+                                        <i class="bi bi-person-circle"></i> Tác Giả
+                                    </a>
+                                    <a class="dropdown-item" asp-controller="Publishers" asp-action="Index">
+                                        <i class="bi bi-headset"></i> Nhà Xuất Bản
+                                    </a>
+
+                                </div>
+                            </li>
+                        }
+                        
                     </ul>
                     <form class="d-flex" asp-controller="Books" asp-action="Filter">
                         <input name="searchString" class="form-control me-sm-2" type="text"  placeholder="Nhập tên sách muốn tìm">
