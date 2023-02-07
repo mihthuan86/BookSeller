@@ -14,7 +14,7 @@ using BookSeller.Data.Static;
 
 namespace BookSeller.Controllers
 {
-    //[Authorize(Roles =UserRoles.Admin)]
+    [Authorize(Roles = UserRoles.Admin)]
     public class BooksController : Controller
     {
         private readonly AppDbContext _context;
@@ -45,7 +45,7 @@ namespace BookSeller.Controllers
             }
             return View("Index",allBooks.ToList());
         }
-       // [AllowAnonymous]
+       [AllowAnonymous]
 
         // GET: Books/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -115,8 +115,8 @@ namespace BookSeller.Controllers
             {
                 return NotFound();
             }
-            ViewData["AuthorId"] = new SelectList(_context.Authors, "Id", "Id", book.AuthorId);
-            ViewData["PublisherId"] = new SelectList(_context.Publishers, "Id", "Id", book.PublisherId);
+            ViewBag.AuthorId = new SelectList(_context.Authors.OrderBy(n => n.FullName).ToList(), "Id", "FullName");
+            ViewBag.PublisherId = new SelectList(_context.Publishers.OrderBy(n => n.FullName).ToList(), "Id", "FullName");
             return View(book);
         }
 
@@ -125,17 +125,27 @@ namespace BookSeller.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Price,ImageURL,PublishingYear,BookCategory,AuthorId,PublisherId")] Book book)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Price,PictureFile,PublishingYear,BookCategory,AuthorId,PublisherId")] Book book)
         {
             if (id != book.Id)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 try
                 {
+                    string wwwRootPath = _webHostEnvironment.WebRootPath;
+                    string fileName = Path.GetFileNameWithoutExtension(book.PictureFile.FileName);
+                    string extension = Path.GetExtension(book.PictureFile.FileName);
+                    fileName += DateTime.Now.ToString("ddMMyyyy") + extension;
+                    book.ImageURL = fileName;
+                    string path = Path.Combine(wwwRootPath + "/Img/Book", fileName);
+                    using (var fileStream = new FileStream(path, FileMode.Create))
+                    {
+                        await book.PictureFile.CopyToAsync(fileStream);
+                    }
                     _context.Update(book);
                     await _context.SaveChangesAsync();
                 }
@@ -152,8 +162,8 @@ namespace BookSeller.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AuthorId"] = new SelectList(_context.Authors, "Id", "Id", book.AuthorId);
-            ViewData["PublisherId"] = new SelectList(_context.Publishers, "Id", "Id", book.PublisherId);
+            ViewBag.AuthorId = new SelectList(_context.Authors.OrderBy(n => n.FullName).ToList(), "Id", "FullName");
+            ViewBag.PublisherId = new SelectList(_context.Publishers.OrderBy(n => n.FullName).ToList(), "Id", "FullName");
             return View(book);
         }
 

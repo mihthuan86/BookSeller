@@ -12,17 +12,17 @@ using BookSeller.Data.Static;
 
 namespace BookSeller.Controllers
 {
-    //[Authorize]
+    [Authorize]
     public class OrdersController : Controller
     {
         private readonly AppDbContext _context;
         private readonly ShoppingCart _shoppingCart;
-        private readonly IOrderService _orderService;
+        private readonly IOrderService _orderService;       
         public OrdersController(ShoppingCart shoppingCart, AppDbContext context, IOrderService orderService)
         {
             _shoppingCart = shoppingCart;
             _context = context;
-            _orderService = orderService;
+            _orderService = orderService;          
         }
 
         public async Task<IActionResult> Index()
@@ -32,7 +32,20 @@ namespace BookSeller.Controllers
             var order = await _orderService.GetOrderByUserIdAndRoleAsync(userId,userRole);
             return View(order);
         }
-
+        public async Task<IActionResult> OrderComfirmed()
+        {
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            string userRole = User.FindFirstValue(ClaimTypes.Role);
+            var order = await _orderService.GetComfirmedOrderByUserIdAndRoleAsync(userId, userRole);
+            return View(order);
+        }
+        public async Task<IActionResult> OrderDelete()
+        {
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            string userRole = User.FindFirstValue(ClaimTypes.Role);
+            var order = await _orderService.GetDeleteOrderByUserIdAndRoleAsync(userId, userRole);
+            return View(order);
+        }
         public IActionResult ShoppingCart()
         {
             var item = _shoppingCart.GetShoppingCartItems();
@@ -44,7 +57,6 @@ namespace BookSeller.Controllers
             };
             return View(response);
         }
-
         public async Task<IActionResult> AddItemToShoppingCart(int id)
         {
             var item = await _context.Books
@@ -70,21 +82,40 @@ namespace BookSeller.Controllers
             return RedirectToAction(nameof(ShoppingCart));
         }
 
-        public async Task<IActionResult> CompleteOrder([Bind("Id,UserId,Name,PhoneNumber,Address")] Order order)
+        public async Task<IActionResult> CompleteOrder(string name, string address, string phone)
         {
+            if(string.IsNullOrEmpty(name) || string.IsNullOrEmpty(address)|| string.IsNullOrEmpty(phone)){
+               return RedirectToAction(nameof(Checkout));
+            }
             var item = _shoppingCart.GetShoppingCartItems();
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            string Name = order.Name;
-            string PhoneNumber = order.PhoneNumber;
-            string Address = order.Address;
+            string Name = name;
+            string PhoneNumber = phone;
+            string Address = address;
             await _orderService.StoreOrderAsync(item, userId, Name, PhoneNumber, Address);
             await _shoppingCart.ClearShoppingCartAsync();
-            return View("OrderCompleted");
+            return View("OrderCompleted");           
         }
         public async Task<IActionResult> Checkout()
         {
-            
+            ViewBag.shoppingCart = _shoppingCart.GetShoppingCartItems();            
+            ViewBag.Total = _shoppingCart.GetShoppingCartTotal();
             return View();
+        }
+        public async Task<IActionResult> Details(int id)
+        {
+            var order = await _orderService.GetOrderByIdAsync(id);
+            if(order == null)
+            {
+                return NotFound();
+            }
+            return View(order);
+        }
+
+        public async Task<IActionResult> ChangeStt(int OrderId,int stt)
+        {
+            await _orderService.ChageOrderStatus(OrderId, stt);           
+            return RedirectToAction(nameof(Index));
         }
     }
 }

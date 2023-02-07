@@ -5,7 +5,12 @@
 }
 
 <h1>Sách mới hôm nay</h1>
-
+<select class="form-select select-book" aria-label="Default select example">
+  <option selected>--Thể Loại--</option>
+  <option value="1">Truyện Tranh</option>
+  <option value="2">Kinh Tế</option>
+  <option value="3">Tiêu Thuyết</option>
+</select>
 <div class="row">
 	@foreach (var item in Model)
 	{
@@ -24,8 +29,8 @@
 							</p>
 						</div>
 					</div>
-					<div class="col-md-6">
-						<img src= "@("/Img/Book/"+item.ImageURL)" width="207px" height="327px" alt="@item.Name">
+					<div class="col-md-6 ">
+						<img class="border border-dark rounded" src="@("/Img/Book/"+item.ImageURL)" width="207px" height="327px" alt="@item.Name">
 					</div>
 					<div class="col-md-6">
 						<div class="card-body">

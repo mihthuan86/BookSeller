@@ -7,6 +7,7 @@ using BookSeller.Data.ViewModels;
 using System.Text.RegularExpressions;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
+using BookSeller.Data.Cart;
 
 namespace BookSeller.Controllers
 {
@@ -14,13 +15,15 @@ namespace BookSeller.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly ShoppingCart _shoppingCart;
         private readonly AppDbContext _context;
 
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, AppDbContext context)
+        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, AppDbContext context, ShoppingCart shoppingCart)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _context = context;
+            _shoppingCart = shoppingCart;   
         }
 
         public static string ConvertToUnSign(string s)
@@ -101,6 +104,7 @@ namespace BookSeller.Controllers
         [HttpPost]
         public async Task<IActionResult> Logout()
         {
+            await _shoppingCart.ClearShoppingCartAsync();
             await _signInManager.SignOutAsync();
             return RedirectToAction("Index", "Books");
         }

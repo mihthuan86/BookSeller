@@ -13,12 +13,16 @@
                         <p class="card-text">
                             <h5 class="card-title">
                                 @Model.Name
+                                @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+                                {
+                                    <a asp-action="Edit" asp-route-id="@Model.Id" class="text-white float-end"><i class="bi bi-pencil-square"></i></a>
+                                }
                             </h5>
                         </p>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <img src="@("/Img/Book/"+Model.ImageURL)" width="100%" alt="@Model.Name">
+                    <img src="@("/Img/Book/"+Model.ImageURL)" style="width:100%"  alt="@Model.Name">
                 </div>
                 <div class="col-md-8">
                     <div class="card-body">
@@ -48,7 +52,7 @@
 
                     </div>
                 </div>
-                <div class="col-md-12">
+                <div class="col-md-12 mb-2">
                     <div class="card-footer">
                         <p class="card-text">
                             <a class="btn btn-outline-primary float-start" asp-action="Index">
@@ -56,7 +60,7 @@
                             </a>
                             <a class="btn btn-success text-white float-end"
                                asp-controller="Orders"
-                               asp-action="AddItemToShoppingCart" asp-route-id="@Model.Id"><i class="bi bi-cart-plus"></i> Add to Cart (@Model.Price VNĐ)</a>
+                               asp-action="AddItemToShoppingCart" asp-route-id="@Model.Id"><i class="bi bi-cart-plus"></i> Thêm vào giỏ hàng (@Model.Price VNĐ)</a>
                         </p>
                     </div>
                 </div>

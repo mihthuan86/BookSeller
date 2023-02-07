@@ -62,7 +62,6 @@ namespace BookSeller.Data.Cart
                 else
                 {
                     _context.ShoppingCartItems.Remove(shoppingCartItem);
-
                 }
             }
              _context.SaveChanges();

@@ -9,7 +9,12 @@ namespace BookSeller.Data.Service
 	
 		Task<List<Order>> GetOrderByUserIdAndRoleAsync(string userId,string userRole);
 
-        Task<List<Order>> GetOrderByIdAsync(int Id);
+        Task<List<Order>> GetComfirmedOrderByUserIdAndRoleAsync(string userId, string userRole);
 
+        Task<List<Order>> GetDeleteOrderByUserIdAndRoleAsync(string userId, string userRole);
+
+        Task<Order> GetOrderByIdAsync(int Id);
+
+		Task ChageOrderStatus(int Id,int stt);
     }
 }
