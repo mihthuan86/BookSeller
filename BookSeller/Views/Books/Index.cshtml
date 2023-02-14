@@ -1,17 +1,12 @@
 ﻿@model IEnumerable<BookSeller.Models.Book>
 
 @{
-    ViewData["Title"] = "Index";
+	ViewData["Title"] = "Index";
 }
 
-<h1>Sách mới hôm nay</h1>
-<select class="form-select select-book" aria-label="Default select example">
-  <option selected>--Thể Loại--</option>
-  <option value="1">Truyện Tranh</option>
-  <option value="2">Kinh Tế</option>
-  <option value="3">Tiêu Thuyết</option>
-</select>
-<div class="row">
+<h1>Chào mừng</h1>
+
+<div class="row ">
 	@foreach (var item in Model)
 	{
 		<div class="col-md-4 col-xs-6 border-primary mb-3">
@@ -22,7 +17,8 @@
 							<p class="card-text">
 								<h5 class="card-title">
 									@item.Name
-									@if(User.Identity.IsAuthenticated && User.IsInRole("Admin")){
+									@if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+									{
 										<a asp-action="Edit" asp-route-id="@item.Id" class="text-white float-end"><i class="bi bi-pencil-square"></i></a>
 									}
 								</h5>
@@ -30,22 +26,24 @@
 						</div>
 					</div>
 					<div class="col-md-6 ">
-						<img class="border border-dark rounded" src="@("/Img/Book/"+item.ImageURL)" width="207px" height="327px" alt="@item.Name">
+						<a asp-action="Details" asp-route-id="@item.Id">
+						<img class="border border-dark rounded" src="@("/Img/Book/"+item.ImageURL)" style="min-height: 325px;" width="100%" alt="@item.Name">
+						</a>
 					</div>
 					<div class="col-md-6">
 						<div class="card-body">
 							@*<p class="card-text">@item.Description</p>*@
 							<p class="card-text"><b>Tác giả: </b>@item.Author.FullName</p>
-							<p class="card-text"><b>Thể Loại: </b>@item.BookCategory</p>							
+							<p class="card-text"><b>Thể Loại: </b>@item.Category.Name</p>
 							<p class="card-text"><b>Năm Xuất Bản: </b>@item.PublishingYear</p>
-							<p class="card-text"><b>Giá:  </b>@item.Price VNĐ</p>
-							
+							<p class="card-text"><b>Giá:  </b>@item.Price.ToString("#,###") VNĐ</p>
+
 						</div>
 					</div>
 					<div class="col-md-12">
 						<div class="card-footer ">
 							<p class="card-text">
-								<a asp-action ="Details" asp-route-id="@item.Id" class="btn btn-outline-primary" style="float:right"><i class="bi bi-eye-fill"></i> Xem chi tiết</a>
+								<a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-primary" style="float:right"><i class="bi bi-eye-fill"></i> Xem chi tiết</a>
 								<a class="btn btn-success text-white" asp-controller="Orders" asp-action="AddItemToShoppingCart" asp-route-id="@item.Id"><i class="bi bi-cart-plus"></i> Thêm vào giỏ hàng </a>
 							</p>
 						</div>
@@ -57,3 +55,25 @@
 </div>
 
 @await Html.PartialAsync("_CreateItem", "Books")
+
+@section Scripts{
+	<script>
+		var activities = document.getElementById("categoryBooks");
+		activities.addEventListener("change", function () {
+			if (activities.value == "0") {
+				goIndex();
+			}
+			else{
+				goCategory();
+			}
+		});
+		function goIndex(){
+			var url = '@Url.Action("Index", "Books")';
+			window.location.href = url;
+		}
+		function goCategory(){
+			var url = '@Url.Action("Category", "Books")?category=' + activities.value;
+			window.location.href = url;
+		}
+	</script>
+}

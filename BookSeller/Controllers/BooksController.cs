@@ -29,21 +29,31 @@ namespace BookSeller.Controllers
         // GET: Books
         public async Task<IActionResult> Index()
         {
-            var appDbContext = _context.Books.Include(b => b.Author).Include(b => b.Publisher);
-           
+            var appDbContext = _context.Books.Include(b => b.Author).Include(b => b.Publisher).Include(b =>b.Category);
+            
             return View(await appDbContext.ToListAsync());
         }
         [AllowAnonymous]
 
         public async Task<IActionResult> Filter(string searchString)
         {
-            var allBooks = from b in _context.Books.Include(b => b.Author).Include(b => b.Publisher) select b;
+            var allBooks = from b in _context.Books.Include(b => b.Author).Include(b => b.Publisher).Include(b => b.Category) select b;
             if (!string.IsNullOrEmpty(searchString))
             {
-                var filterBooks = allBooks.Where(s=>s.Name.Contains(searchString)|| s.Description.Contains(searchString)).ToList();
+                var filterBooks = allBooks.Where(s=>s.Name.Contains(searchString)|| s.Author.FullName.Contains(searchString)).ToList();
+                
                 return View("Index", filterBooks);
             }
             return View("Index",allBooks.ToList());
+        }
+
+        [AllowAnonymous]
+        public async Task<IActionResult> Category(int category)
+        {
+            var allBooks = from b in _context.Books.Include(b => b.Author).Include(b => b.Publisher).Include(b => b.Category) select b;           
+            var filterBooks = allBooks.Where(s => ((int)s.CategoryId) == category).ToList();
+                                
+            return View("Index", filterBooks);                   
         }
        [AllowAnonymous]
 
@@ -58,6 +68,7 @@ namespace BookSeller.Controllers
             var book = await _context.Books
                 .Include(b => b.Author)
                 .Include(b => b.Publisher)
+                .Include(b => b.Category)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (book == null)
             {
@@ -71,6 +82,7 @@ namespace BookSeller.Controllers
         {
             ViewBag.AuthorId = new SelectList(_context.Authors.OrderBy(n => n.FullName).ToList(),"Id","FullName");
             ViewBag.PublisherId = new SelectList(_context.Publishers.OrderBy(n => n.FullName).ToList(), "Id", "FullName");
+            ViewBag.CategoryId = new SelectList(_context.Categories.OrderBy(n => n.Name).ToList(), "Id", "Name");
             return View();
         }
 
@@ -79,7 +91,7 @@ namespace BookSeller.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Description,Price,PictureFile,PublishingYear,BookCategory,AuthorId,PublisherId")] Book book)
+        public async Task<IActionResult> Create([Bind("Id,Name,Description,Price,PictureFile,PublishingYear,CategoryId,AuthorId,PublisherId")] Book book)
         {
             if (!ModelState.IsValid)
             {
@@ -99,6 +111,7 @@ namespace BookSeller.Controllers
             }
             ViewBag.AuthorId = new SelectList(_context.Authors.OrderBy(n => n.FullName).ToList(), "Id", "FullName");
             ViewBag.PublisherId = new SelectList(_context.Publishers.OrderBy(n => n.FullName).ToList(), "Id", "FullName");
+            ViewBag.CategoryId = new SelectList(_context.Categories.OrderBy(n => n.Name).ToList(), "Id", "Name");
             return View(book);
         }
 
@@ -117,6 +130,7 @@ namespace BookSeller.Controllers
             }
             ViewBag.AuthorId = new SelectList(_context.Authors.OrderBy(n => n.FullName).ToList(), "Id", "FullName");
             ViewBag.PublisherId = new SelectList(_context.Publishers.OrderBy(n => n.FullName).ToList(), "Id", "FullName");
+            ViewBag.CategoryId = new SelectList(_context.Categories.OrderBy(n => n.Name).ToList(), "Id", "Name");
             return View(book);
         }
 
@@ -125,7 +139,7 @@ namespace BookSeller.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Price,PictureFile,PublishingYear,BookCategory,AuthorId,PublisherId")] Book book)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Price,PictureFile,PublishingYear,CategoryId,AuthorId,PublisherId")] Book book)
         {
             if (id != book.Id)
             {
@@ -164,6 +178,7 @@ namespace BookSeller.Controllers
             }
             ViewBag.AuthorId = new SelectList(_context.Authors.OrderBy(n => n.FullName).ToList(), "Id", "FullName");
             ViewBag.PublisherId = new SelectList(_context.Publishers.OrderBy(n => n.FullName).ToList(), "Id", "FullName");
+            ViewBag.CategoryId = new SelectList(_context.Categories.OrderBy(n => n.Name).ToList(), "Id", "Name");
             return View(book);
         }
 
@@ -178,6 +193,7 @@ namespace BookSeller.Controllers
             var book = await _context.Books
                 .Include(b => b.Author)
                 .Include(b => b.Publisher)
+                .Include(b => b.Category)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (book == null)
             {

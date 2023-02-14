@@ -34,7 +34,7 @@
                             </a>
                         </p>                      
                         <p class="card-text">
-                            <b>Thể Loại: @Model.BookCategory </b>@{
+                            <b>Thể Loại: @Model.Category.Name </b>@{
                             
                         }</p>
                         <p class="card-text"><b> Năm Xuất Bản: </b>@Model.PublishingYear</p>                                            
@@ -60,7 +60,7 @@
                             </a>
                             <a class="btn btn-success text-white float-end"
                                asp-controller="Orders"
-                               asp-action="AddItemToShoppingCart" asp-route-id="@Model.Id"><i class="bi bi-cart-plus"></i> Thêm vào giỏ hàng (@Model.Price VNĐ)</a>
+                               asp-action="AddItemToShoppingCart" asp-route-id="@Model.Id"><i class="bi bi-cart-plus"></i> Thêm vào giỏ hàng (@Model.Price.ToString("#,###") VNĐ)</a>
                         </p>
                     </div>
                 </div>

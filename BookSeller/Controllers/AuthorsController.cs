@@ -13,7 +13,7 @@ using BookSeller.Data.Static;
 
 namespace BookSeller.Controllers
 {
-    //[Authorize(Roles = UserRoles.Admin)]
+    [Authorize(Roles = UserRoles.Admin)]
     public class AuthorsController : Controller
     {
         private readonly AppDbContext _context;
@@ -23,7 +23,7 @@ namespace BookSeller.Controllers
             _context = context;
             _webHostEnvironment = webHostEnvironment;
         }
-        //[AllowAnonymous]
+        [AllowAnonymous]
         // GET: Authors
         public async Task<IActionResult> Index()
         {

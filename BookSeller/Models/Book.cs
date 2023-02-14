@@ -33,9 +33,12 @@ namespace BookSeller.Models
         [Required(ErrorMessage = "PublishingYear is required")]
         public int PublishingYear { get; set; }
 
+        //relationship-Thể loại
         [Display(Name = "Thể loại")]
         [Required(ErrorMessage = "BookCategory is required")]
-        public BookCategory BookCategory { get; set; }
+        public int CategoryId { get; set; }
+        [ForeignKey("CategoryId")]
+        public Category Category { get; set; }
 
         //relationship-author
         [Display(Name = "Tác giả")]

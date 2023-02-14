@@ -15,6 +15,8 @@ namespace BookSeller.Data
         public DbSet<Author> Authors { get; set; }
         public DbSet<Book> Books { get; set; }
 
+        public DbSet<Category> Categories { get; set; }
+
         //Order
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }

@@ -53,6 +53,27 @@ namespace BookSeller.Data
                     });
                     context.SaveChanges();
                 }
+
+                //category
+                if (!context.Categories.Any())
+                {
+                    context.Categories.AddRange(new List<Category>()
+                    {
+                        new Category()
+                        {
+                            Name = "Tiểu thuyết",
+                            Description = "This is the Bio of the first Category",
+
+                        },
+                        new Category()
+                        {
+                            Name = "Truyện Tranh",
+                            Description = "This is the Bio of the second Category",
+
+                        }
+                    });
+                    context.SaveChanges();
+                }
                 //movie
                 if (!context.Books.Any())
                 {
@@ -67,7 +88,7 @@ namespace BookSeller.Data
                             PublishingYear = 2005,
                             AuthorId = 1,
                             PublisherId = 1,
-                            BookCategory = BookCategory.TruyenTranh
+                            CategoryId = 1
                         },
                         new Book()
                         {
@@ -78,7 +99,7 @@ namespace BookSeller.Data
                             PublishingYear = 2007,
                             AuthorId = 1,
                             PublisherId = 1,
-                            BookCategory = BookCategory.KinhTe
+                            CategoryId = 1
                         },
                         new Book()
                         {
@@ -89,7 +110,7 @@ namespace BookSeller.Data
                             PublishingYear = 2010,
                             AuthorId = 2,
                             PublisherId = 2,
-                            BookCategory = BookCategory.TieuThuyet
+                            CategoryId = 2,
                         }
                     });
                     context.SaveChanges();

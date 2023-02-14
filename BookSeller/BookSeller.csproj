@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Migrations\" />
+    <Folder Include="wwwroot\admin\vendor\choices.js\src\" />
     <Folder Include="wwwroot\Img\Book\" />
     <Folder Include="wwwroot\Img\Publisher\" />
   </ItemGroup>
