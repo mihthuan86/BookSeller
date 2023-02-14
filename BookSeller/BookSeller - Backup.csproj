@@ -17,9 +17,10 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.11" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup>    
     <Folder Include="wwwroot\Img\Book\" />
     <Folder Include="wwwroot\Img\Publisher\" />
+    <Folder Include="wwwroot\Img\Author\" />
   </ItemGroup>
 
 </Project>
