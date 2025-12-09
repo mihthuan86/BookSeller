@@ -13,6 +13,7 @@ builder.Services.AddDbContext<AppDbContext>(option => option.UseSqlServer(
     builder.Configuration.GetConnectionString("DefaltConnectionString")
     ));
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped(sc => ShoppingCart.GetShoppingCart(sc));
 
