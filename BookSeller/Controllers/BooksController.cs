@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Hosting;
 using NuGet.Protocol;
 using Microsoft.AspNetCore.Authorization;
 using BookSeller.Data.Static;
+using BookSeller.Data.ViewModels;
+using BookSeller.Data.Service;
 
 namespace BookSeller.Controllers
 {
@@ -18,30 +20,29 @@ namespace BookSeller.Controllers
     public class BooksController : Controller
     {
         private readonly AppDbContext _context;
-        private readonly IWebHostEnvironment _webHostEnvironment;
-        public BooksController(AppDbContext context, IWebHostEnvironment webHostEnvironment)
+        private readonly IFileUploadService _fileUploadService;
+
+        public BooksController(AppDbContext context, IFileUploadService fileUploadService)
         {
             _context = context;
-            _webHostEnvironment = webHostEnvironment;
+            _fileUploadService = fileUploadService;
         }
-        [AllowAnonymous]
 
+        [AllowAnonymous]
         // GET: Books
         public async Task<IActionResult> Index()
         {
             var appDbContext = _context.Books.Include(b => b.Author).Include(b => b.Publisher).Include(b =>b.Category);
-            
             return View(await appDbContext.ToListAsync());
         }
-        [AllowAnonymous]
 
+        [AllowAnonymous]
         public async Task<IActionResult> Filter(string searchString)
         {
             var allBooks = from b in _context.Books.Include(b => b.Author).Include(b => b.Publisher).Include(b => b.Category) select b;
             if (!string.IsNullOrEmpty(searchString))
             {
                 var filterBooks = allBooks.Where(s=>s.Name.Contains(searchString)|| s.Author.FullName.Contains(searchString)).ToList();
-                
                 return View("Index", filterBooks);
             }
             return View("Index",allBooks.ToList());
@@ -52,11 +53,10 @@ namespace BookSeller.Controllers
         {
             var allBooks = from b in _context.Books.Include(b => b.Author).Include(b => b.Publisher).Include(b => b.Category) select b;           
             var filterBooks = allBooks.Where(s => ((int)s.CategoryId) == category).ToList();
-                                
             return View("Index", filterBooks);                   
         }
-       [AllowAnonymous]
 
+       [AllowAnonymous]
         // GET: Books/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -77,6 +77,7 @@ namespace BookSeller.Controllers
 
             return View(book);
         }       
+
         // GET: Books/Create
         public IActionResult Create()
         {
@@ -87,32 +88,34 @@ namespace BookSeller.Controllers
         }
 
         // POST: Books/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Description,Price,PictureFile,PublishingYear,CategoryId,AuthorId,PublisherId")] Book book)
+        public async Task<IActionResult> Create(BookViewModel bookVM)
         {
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                string wwwRootPath = _webHostEnvironment.WebRootPath;
-                string fileName = Path.GetFileNameWithoutExtension(book.PictureFile.FileName);
-                string extension = Path.GetExtension(book.PictureFile.FileName);
-                fileName += DateTime.Now.ToString("ddMMyyyy") + extension;
-                book.ImageURL = fileName;
-                string path = Path.Combine(wwwRootPath + "/Img/Book", fileName);
-                using (var fileStream = new FileStream(path, FileMode.Create))
+                string fileName = await _fileUploadService.UploadFileAsync(bookVM.PictureFile, AppConstants.BookImagePath);
+
+                var book = new Book
                 {
-                    await book.PictureFile.CopyToAsync(fileStream);
-                }
+                    Name = bookVM.Name,
+                    Description = bookVM.Description,
+                    Price = bookVM.Price,
+                    ImageURL = fileName,
+                    PublishingYear = bookVM.PublishingYear,
+                    CategoryId = bookVM.CategoryId,
+                    AuthorId = bookVM.AuthorId,
+                    PublisherId = bookVM.PublisherId
+                };
+
                 _context.Add(book);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewBag.AuthorId = new SelectList(_context.Authors.OrderBy(n => n.FullName).ToList(), "Id", "FullName");
-            ViewBag.PublisherId = new SelectList(_context.Publishers.OrderBy(n => n.FullName).ToList(), "Id", "FullName");
-            ViewBag.CategoryId = new SelectList(_context.Categories.OrderBy(n => n.Name).ToList(), "Id", "Name");
-            return View(book);
+            ViewBag.AuthorId = new SelectList(_context.Authors.OrderBy(n => n.FullName).ToList(), "Id", "FullName", bookVM.AuthorId);
+            ViewBag.PublisherId = new SelectList(_context.Publishers.OrderBy(n => n.FullName).ToList(), "Id", "FullName", bookVM.PublisherId);
+            ViewBag.CategoryId = new SelectList(_context.Categories.OrderBy(n => n.Name).ToList(), "Id", "Name", bookVM.CategoryId);
+            return View(bookVM);
         }
 
         // GET: Books/Edit/5
@@ -128,44 +131,66 @@ namespace BookSeller.Controllers
             {
                 return NotFound();
             }
-            ViewBag.AuthorId = new SelectList(_context.Authors.OrderBy(n => n.FullName).ToList(), "Id", "FullName");
-            ViewBag.PublisherId = new SelectList(_context.Publishers.OrderBy(n => n.FullName).ToList(), "Id", "FullName");
-            ViewBag.CategoryId = new SelectList(_context.Categories.OrderBy(n => n.Name).ToList(), "Id", "Name");
-            return View(book);
+
+            var bookVM = new BookEditViewModel
+            {
+                Id = book.Id,
+                Name = book.Name,
+                Description = book.Description,
+                Price = book.Price,
+                ImageURL = book.ImageURL,
+                PublishingYear = book.PublishingYear,
+                CategoryId = book.CategoryId,
+                AuthorId = book.AuthorId,
+                PublisherId = book.PublisherId
+            };
+
+            ViewBag.AuthorId = new SelectList(_context.Authors.OrderBy(n => n.FullName).ToList(), "Id", "FullName", book.AuthorId);
+            ViewBag.PublisherId = new SelectList(_context.Publishers.OrderBy(n => n.FullName).ToList(), "Id", "FullName", book.PublisherId);
+            ViewBag.CategoryId = new SelectList(_context.Categories.OrderBy(n => n.Name).ToList(), "Id", "Name", book.CategoryId);
+            return View(bookVM);
         }
 
         // POST: Books/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Price,PictureFile,PublishingYear,CategoryId,AuthorId,PublisherId")] Book book)
+        public async Task<IActionResult> Edit(int id, BookEditViewModel bookVM)
         {
-            if (id != book.Id)
+            if (id != bookVM.Id)
             {
                 return NotFound();
             }
 
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 try
                 {
-                    string wwwRootPath = _webHostEnvironment.WebRootPath;
-                    string fileName = Path.GetFileNameWithoutExtension(book.PictureFile.FileName);
-                    string extension = Path.GetExtension(book.PictureFile.FileName);
-                    fileName += DateTime.Now.ToString("ddMMyyyy") + extension;
-                    book.ImageURL = fileName;
-                    string path = Path.Combine(wwwRootPath + "/Img/Book", fileName);
-                    using (var fileStream = new FileStream(path, FileMode.Create))
+                    var book = await _context.Books.FindAsync(id);
+                    if (book == null)
                     {
-                        await book.PictureFile.CopyToAsync(fileStream);
+                        return NotFound();
                     }
+
+                    if (bookVM.PictureFile != null)
+                    {
+                         string fileName = await _fileUploadService.UploadFileAsync(bookVM.PictureFile, AppConstants.BookImagePath);
+                         book.ImageURL = fileName;
+                    }
+
+                    book.Name = bookVM.Name;
+                    book.Description = bookVM.Description;
+                    book.Price = bookVM.Price;
+                    book.PublishingYear = bookVM.PublishingYear;
+                    book.CategoryId = bookVM.CategoryId;
+                    book.AuthorId = bookVM.AuthorId;
+                    book.PublisherId = bookVM.PublisherId;
+
                     _context.Update(book);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!BookExists(book.Id))
+                    if (!BookExists(bookVM.Id))
                     {
                         return NotFound();
                     }
@@ -176,10 +201,10 @@ namespace BookSeller.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewBag.AuthorId = new SelectList(_context.Authors.OrderBy(n => n.FullName).ToList(), "Id", "FullName");
-            ViewBag.PublisherId = new SelectList(_context.Publishers.OrderBy(n => n.FullName).ToList(), "Id", "FullName");
-            ViewBag.CategoryId = new SelectList(_context.Categories.OrderBy(n => n.Name).ToList(), "Id", "Name");
-            return View(book);
+            ViewBag.AuthorId = new SelectList(_context.Authors.OrderBy(n => n.FullName).ToList(), "Id", "FullName", bookVM.AuthorId);
+            ViewBag.PublisherId = new SelectList(_context.Publishers.OrderBy(n => n.FullName).ToList(), "Id", "FullName", bookVM.PublisherId);
+            ViewBag.CategoryId = new SelectList(_context.Categories.OrderBy(n => n.Name).ToList(), "Id", "Name", bookVM.CategoryId);
+            return View(bookVM);
         }
 
         // GET: Books/Delete/5
